@@ -1,2 +1,2 @@
-# JW00XPBar
-Yet Another XP Bar Addon
+# JWXPBar
+Yes Another XP Bar Addon
