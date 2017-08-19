@@ -1,92 +1,79 @@
 -- Yes Another XP Bar.
+
 --Config area
 local JWBarHeight = 28
 local JWBarWidth = 250
 local JWBarAnchor = {"CENTER", UIPARENT, "CENTER", 0, -275}
-local JWBarPoint = {"TOP", "JWBackdrop","TOP", 0, 0}
-local JWBarbgTexture = [[Interface\addons\JW00XPBar\fer2.tga]]
+local JWBarPoint = {"CENTER", "JWXPBarFrame","CENTER", 0, 0}
 local JWBarTexture = "Interface\\TargetingFrame\\UI-StatusBar"
-local JWBarFont = [[Fonts\FRIZQT__.TTF]]
-local JWBarFontSize = 14
+--local JWBarFont = [[Fonts\FRIZQT__.TTF]]
+local JWBarFont = [[Interface\addons\JWXPBar\ROADWAY_.ttf]]
+local JWBarFontSize = 15
 local JWBarFontFlags = "NONE"
+local JWRestColor = { r = 0, g = 0, b = 1 }
+local JWXPColor = { r = 0, g = 1, b = 0 }
 --local JWFrameType = "StatusBar"
 --local JWFrameName = "JWxpBar"
 --local JWFrameParent = {UIParent}
 --local JWFrameTemplate = "TextStatusBar"
 
 --Beyond here be dragons
-function comma_value(n) -- credit http://richard.warburton.it seems to work OK.
-	local left,num,right = string.match(n,'^([^%d]*%d)(%d*)(.-)$')
-	return left..(num:reverse():gsub('(%d%d%d)','%1,'):reverse())..right
+function comma_value(n)
+  return tostring(math.floor(n)):reverse():gsub("(%d%d%d)","%1,"):gsub(",(%-?)$","%1"):reverse()
 end
---[[
-function CreateBar ()
-	CreateFrame(JWFrameType, JWFrameName, JWFrameAnchor, JWFrameType)
-end
---]]
+
+local JWXPBarFrame = CreateFrame("Frame", "JWXPBarFrame", UIParent)
+JWXPBarFrame:SetFrameStrata("HIGH")
+JWXPBarFrame:SetHeight(JWBarHeight)
+JWXPBarFrame:SetWidth(JWBarWidth)
+JWXPBarFrame:SetPoint(unpack(JWBarAnchor))
+JWXPBarFrame:EnableMouse(true)
+JWXPBarFrame:SetMovable(true)
+JWXPBarFrame:SetClampedToScreen(true)
+
 --Create Background and Border
-local backdrop = CreateFrame("Frame", "JWBackdrop", UIParent)
+local backdrop = JWXPBarFrame:CreateTexture(nil, "BACKGROUND")
 backdrop:SetHeight(JWBarHeight)
 backdrop:SetWidth(JWBarWidth)
-backdrop:SetPoint(unpack(JWBarAnchor))
-backdrop:SetBackdrop({
-	bgFile = JWbarbgTexture, 
-	edgeFile = JWbarbgTexture, 
-	tile = false, tileSize = 0, edgeSize = 1, 
-	insets = { left = -1, right = -1, top = -1, bottom = -1}
-})
-backdrop:SetBackdropColor(0, 0, 0)
-backdrop:SetBackdropBorderColor(.2, .2, .2, 0)
-backdrop:EnableMouse(true)
-backdrop:SetMovable(true)
-backdrop:SetClampedToScreen(true)
+backdrop:SetPoint(unpack(JWBarPoint))
+backdrop:SetTexture(JWBarTexture)
+backdrop:SetVertexColor(0.1, 0.1, 0.1)
+JWXPBarFrame.backdrop = backdrop
 
 --Rested XP Bar
-local JWRestedxpBar = CreateFrame("StatusBar", "JWRestedxpBar", backdrop, "TextStatusBar")
-JWRestedxpBar:SetHeight(JWBarHeight)
-JWRestedxpBar:SetWidth(JWBarWidth)
-JWRestedxpBar:SetPoint(unpack(JWBarPoint))
---JWRestedxpBar:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
-JWRestedxpBar:SetStatusBarTexture(JWBarTexture)
-JWRestedxpBar:GetStatusBarTexture():SetHorizTile(false)
-JWRestedxpBar:SetStatusBarColor(0,0,1,1)
-JWRestedxpBar:Hide()
+local JWRestBar = CreateFrame("StatusBar", nil, JWXPBarFrame)
+JWRestBar:SetHeight(JWBarHeight)
+JWRestBar:SetWidth(JWBarWidth)
+JWRestBar:SetPoint(unpack(JWBarPoint))
+JWRestBar:SetStatusBarTexture(JWBarTexture)
+JWRestBar:GetStatusBarTexture():SetHorizTile(false)
+JWRestBar:SetStatusBarColor(JWRestColor.r, JWRestColor.g, JWRestColor.b, 1)
+JWXPBarFrame.JWRestBar = JWRestBar
 
 --XP Bar
-local JWBar = CreateFrame("StatusBar", "JWBar", JWRestedxpBar, "TextStatusBar")
-JWBar:SetWidth(JWBarWidth)
-JWBar:SetHeight(JWBarHeight)
-JWBar:SetPoint(unpack(JWBarPoint))
-JWBar:SetStatusBarTexture(JWBarTexture)
-JWBar:GetStatusBarTexture():SetHorizTile(false)
-JWBar:SetStatusBarColor(0,1,0,1)
-
---Create frame used for mouseover, clicks, and text
-local mouseFrame = CreateFrame("Frame", "JWmouseFrame", JWBar)
-mouseFrame:SetAllPoints(backdrop)
---mouseFrame:SetPoint(unpack(JWBarPoint))
+local JWXPBar = CreateFrame("StatusBar", "JWXPBar", JWRestBar)
+JWXPBar:SetWidth(JWBarWidth)
+JWXPBar:SetHeight(JWBarHeight)
+JWXPBar:SetPoint(unpack(JWBarPoint))
+JWXPBar:SetStatusBarTexture(JWBarTexture)
+JWXPBar:GetStatusBarTexture():SetHorizTile(false)
+JWXPBar:SetStatusBarColor(JWXPColor.r, JWXPColor.g, JWXPColor.b, 1)
+JWXPBarFrame.JWXPBar = JWXPBar
 
 --Create XP Text
-local Text = mouseFrame:CreateFontString("JWxpBarText", "OVERLAY")
---Text:SetFont("Fonts\\FRIZQT__.TTF",14,"NONE")
+local Text = JWXPBar:CreateFontString("JWxpBarText", "OVERLAY")
 Text:SetFont(JWBarFont, JWBarFontSize, JWBarFontFlags)
-Text:SetPoint("CENTER", mouseFrame, "CENTER",0,1)
+Text:SetPoint("CENTER", JWXPBar, "CENTER",0,1)
 Text:SetAlpha(1)
 
---Set Frame levels this seems to make the XP bar and Rested XP bar display properly.
-backdrop:SetFrameLevel(3)
-JWRestedxpBar:SetFrameLevel(1)
-JWBar:SetFrameLevel(2)
-mouseFrame:SetFrameLevel(3)
-
-backdrop:SetScript("OnMouseDown", function(self, button)
+JWXPBarFrame:SetScript("OnMouseDown", function(self, button)
   if button == "LeftButton" and (IsShiftKeyDown()) and not self.isMoving then
    self:StartMoving();
    self.isMoving = true;
   end
 end)
 
-backdrop:SetScript("OnMouseUp", function(self, button)
+JWXPBarFrame:SetScript("OnMouseUp", function(self, button)
   if button == "LeftButton" and (IsShiftKeyDown()) and self.isMoving then
    self:StopMovingOrSizing();
    self.isMoving = false;
@@ -94,35 +81,37 @@ backdrop:SetScript("OnMouseUp", function(self, button)
 end)
 	
 local function UpdateStatus()
-	local JWBarCurrXP = UnitXP("player")
-	local JWBarMaxXP = UnitXPMax("player")
-	local JWBarRestXP = GetXPExhaustion() or 0
-	local JWBarPercXP = floor(JWBarCurrXP/JWBarMaxXP*100)
+	local JWCurrXP, JWMaxXP, JWRestXP, JWPercXP = UnitXP("player"), UnitXPMax("player"), GetXPExhaustion() or 0
+	local JWPercXP = floor(JWCurrXP/JWMaxXP*100)
 
 	if UnitLevel("player") == MAX_PLAYER_LEVEL then
 		backdrop:Hide()
-		JWRestedxpBar:Hide()
-		JWBar:Hide()
-		mouseFrame:Hide()
+		JWRestBar:Hide()
+		JWXPBar:Hide()
+		JWXPBarFrame:Hide()
 	else
-		JWBar:SetMinMaxValues(min(0, JWBarCurrXP),JWBarMaxXP)
-		JWBar:SetValue(JWBarCurrXP)
-
-		if JWBarRestXP then
-			Text:SetText(format("%s/%s (%s%%|cffb3e1ff+%d%%|r)", comma_value(JWBarCurrXP), comma_value(JWBarMaxXP), JWBarPercXP, JWBarRestXP/JWBarMaxXP*100))
-			JWRestedxpBar:Show()
-			JWRestedxpBar:SetMinMaxValues(0,JWBarMaxXP)
-			JWRestedxpBar:SetValue(JWBarCurrXP + JWBarRestXP)
+		JWXPBar:SetMinMaxValues(min(0, JWCurrXP),JWMaxXP)
+		JWXPBar:SetValue(JWCurrXP)
+		if JWRestXP then
+			Text:SetText(format("%s/%s (%s%%|cffb3e1ff+%d%%|r)", comma_value(JWCurrXP), comma_value(JWMaxXP), JWPercXP, JWRestXP/JWMaxXP*100))
+			JWRestBar:Show()
+			JWRestBar:SetMinMaxValues(0,JWMaxXP)
+			if JWCurrXP + JWRestXP > JWMaxXP then
+				JWRestBar:SetValue(JWMaxXP)
+			else
+				JWRestBar:SetValue(JWCurrXP + JWRestXP)
+			end
 		else
-			JWRestedxpBar:Hide()
-			Text:SetText(format("%s/%s (%s%%|cffb3e1ff+%d%%|r)", comma_value(JWBarCurrXP), comma_value(JWBarMaxXP), JWBarPercXP))
+			--JWRestBar:Hide()
+			JWRestBar:SetMinMaxValues(0,1)
+			JWRestBar:SetValue(0)
+			Text:SetText(format("%s/%s (%s%%|cffb3e1ff+%d%%|r)", comma_value(JWCurrXP), comma_value(JWMaxXP), JWPercXP))
 		end
 	end
 end
 
-local frame = CreateFrame("Frame",nil,UIParent)
-frame:RegisterEvent("PLAYER_LEVEL_UP")
-frame:RegisterEvent("PLAYER_XP_UPDATE")
-frame:RegisterEvent("UPDATE_EXHAUSTION")
-frame:RegisterEvent("PLAYER_ENTERING_WORLD")
-frame:SetScript("OnEvent", UpdateStatus)
+JWXPBarFrame:RegisterEvent("PLAYER_LEVEL_UP")
+JWXPBarFrame:RegisterEvent("PLAYER_XP_UPDATE")
+JWXPBarFrame:RegisterEvent("UPDATE_EXHAUSTION")
+JWXPBarFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+JWXPBarFrame:SetScript("OnEvent", UpdateStatus)

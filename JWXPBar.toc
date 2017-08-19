@@ -2,7 +2,8 @@
 
 ## Title: JWXPBar
 ## Version: 0.9
-## Notes: Yes Another XP Bar (YAXPBAR)
+## Notes: Simple XP Bar
+## X-Category: Character Advancement
 
 ## Author: JDoubleU00
 ## X-Email: JDoubleU00@gmail.com
